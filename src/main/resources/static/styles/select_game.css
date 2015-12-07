@@ -1,0 +1,55 @@
+* {
+    box-sizing: border-box;
+    }
+
+body {
+    background-color: black;
+    color: grey;
+    font-family: Arial, san-serif;
+    text-align: center;
+    font-size: 16px;
+    }
+
+main {
+    margin: 0 auto;
+    width: 70%;
+    }
+
+h1 {
+    color: springgreen;
+    }
+
+h2 {
+    color: darkgray;
+    }
+
+a {
+    text-decoration: none;
+    }
+
+.game-selector {
+    width: 800px;
+    margin: 0 auto;
+    }
+
+.game-option {
+    display: block;
+    float: left;
+    width: 400px;
+    height: 200px;
+    color: darkturquoise;
+    line-height: 200px;
+    border: darkgray 1px solid;
+    }
+
+.game-option:visited {
+    color: darkturquoise;
+    }
+
+.game-option:hover {
+    color: cyan;
+    }
+
+.space-medium {
+    margin-bottom: 3em;
+    }

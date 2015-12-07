@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Play Tic Tac Toe</title>
+    <link rel="stylesheet" href="/styles/select_game.css"/>
+</head>
+<body>
+<h1 class="space-medium">Tic Tac Toe</h1>
+<main>
+    <section class="game-selector">
+
+        <h2>Please select game option</h2>
+
+        <a class="game-option"
+           th:each="gameOption : ${gameOptions}"
+           th:text="${gameOption.readableOption()}"
+        ></a>
+
+    </section>
+</main>
+
+</body>
+</html>
