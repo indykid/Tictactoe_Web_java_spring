@@ -28,6 +28,7 @@ dependencies {
   compile group: "org.springframework.boot", name: "spring-boot-starter-thymeleaf"
   compile group: "kg.jarkyn", name: "TictactoeCore", version: "1.3.0"
   testCompile group: "junit", name: "junit"
+  testCompile group: "org.springframework", name: "spring-test"
 }
 
 task wrapper(type: Wrapper) {
