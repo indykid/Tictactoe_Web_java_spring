@@ -29,4 +29,20 @@ public class TictactoeControllerWithoutSpringSetupTest {
                 model.get("moves"));
     }
 
+    @Test
+    public void playsReceivedPosition() {
+        modelAndView = controller.game("0", "NONE-NONE-NONE-NONE-NONE-NONE-NONE-NONE-NONE", "X");
+
+        Map model = modelAndView.getModel();
+        assertEquals("game", modelAndView.getViewName());
+        assertEquals("X-NONE-NONE-NONE-NONE-NONE-NONE-NONE-NONE", model.get("moves"));
+        assertEquals("O", model.get("mark"));
+    }
+
+    @Test
+    public void getsGameOver() {
+        modelAndView = controller.game("8", "X-O-X-X-O-O-O-X-NONE", "X");
+
+        assertEquals("game_over", modelAndView.getViewName());
+    }
 }

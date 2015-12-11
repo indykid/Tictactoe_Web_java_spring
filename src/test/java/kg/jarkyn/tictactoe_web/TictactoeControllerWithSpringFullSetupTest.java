@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.junit.Assert.assertTrue;
@@ -38,6 +39,15 @@ public class TictactoeControllerWithSpringFullSetupTest {
     @Test
     public void getNewGame() throws Exception {
         URL url = new URL(baseUrl + "/game");
+
+        response = template.getForEntity(url.toString(), String.class);
+
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
+
+    @Test
+    public void getsGameOver() throws MalformedURLException {
+        URL url = new URL(baseUrl + "/game?moves=X-O-X-X-O-O-O-X-NONE&position=8&mark=X");
 
         response = template.getForEntity(url.toString(), String.class);
 
