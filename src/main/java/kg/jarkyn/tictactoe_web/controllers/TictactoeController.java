@@ -1,13 +1,15 @@
 package kg.jarkyn.tictactoe_web.controllers;
 
-import kg.jarkyn.*;
+import kg.jarkyn.Board;
+import kg.jarkyn.Game;
+import kg.jarkyn.GameFactory;
+import kg.jarkyn.GameOption;
 import kg.jarkyn.tictactoe_web.ParamParser;
+import kg.jarkyn.tictactoe_web.WebUI;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/game")
@@ -40,21 +42,8 @@ public class TictactoeController {
     }
 
     private String updateMoves(String moves, String position, String mark) {
-        String updatedMoves;
         String[] splitMoves = moves.split("-");
         splitMoves[ParamParser.parseNumeric(position)] = mark;
         return String.join("-", splitMoves);
-    }
-
-    private class WebUI implements HumanInput {
-        @Override
-        public int getMove(List<Integer> list) {
-            return 0;
-        }
-
-        @Override
-        public boolean hasHumanMove() {
-            return false;
-        }
     }
 }
