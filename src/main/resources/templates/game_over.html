@@ -2,9 +2,19 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title></title>
+    <link rel="stylesheet" href="/styles/main.css"/>
+    <title>Play Tic Tac Toe</title>
 </head>
 <body>
+<main>
+    <h1 class="space-medium">Game Over</h1>
 
+    <h2 th:if="${!winner.isEmpty()}" th:text="'Player ' + ${winner} + ' has won this game!'"></h2>
+    <h2 th:if="${winner.isEmpty()}">It's a draw!</h2>
+
+    <h3>
+        <a href="/game">Click to play again</a>
+    </h3>
+</main>
 </body>
 </html>

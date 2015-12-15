@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Play Tic Tac Toe</title>
+    <link rel="stylesheet" href="/styles/main.css"/>
 </head>
 <body>
+    <h1 class="space-medium">Tic Tac Toe</h1>
+    <main>
+        <section class="grid cf">
+            <div th:each="mark, iterStat : ${marks}" class="cell">
+                <a th:if="${mark.isEmpty()}" th:href="@{/game(position=${iterStat.index})}"></a>
 
+                <p th:if="${!mark.isEmpty()}" th:text="${mark}"></p>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
