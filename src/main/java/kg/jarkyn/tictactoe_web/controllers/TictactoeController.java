@@ -1,8 +1,6 @@
 package kg.jarkyn.tictactoe_web.controllers;
 
-import kg.jarkyn.Board;
 import kg.jarkyn.Game;
-import kg.jarkyn.GameFactory;
 import kg.jarkyn.GameOption;
 import kg.jarkyn.tictactoe_web.ParamParser;
 import kg.jarkyn.tictactoe_web.WebUI;
@@ -15,35 +13,49 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/game")
 public class TictactoeController {
     private static final GameOption DEFAULT_GAME_OPTION = GameOption.HUMAN_ONLY;
+    private WebUI webUI = new WebUI();
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView newGame() {
+        setupGame();
         ModelAndView modelAndView = new ModelAndView("game");
-        modelAndView.addObject("moves", "NONE-NONE-NONE-NONE-NONE-NONE-NONE-NONE-NONE");
+        modelAndView.addObject("marks", webUI.getMarks());
         return modelAndView;
     }
 
-    @RequestMapping(method = RequestMethod.GET, params = {"position", "moves", "mark"})
-    public ModelAndView game(String position, String moves, String mark) {
-        ModelAndView modelAndView = new ModelAndView("game");
+    @RequestMapping(method = RequestMethod.GET, params = {"position"})
+    public ModelAndView game(String position) {
+        playGame(position);
 
-        String updatedMoves = updateMoves(moves, position, mark);
-        Game game = GameFactory.makeGame(new Board(ParamParser.parseMoves(updatedMoves)), DEFAULT_GAME_OPTION, new WebUI
-                ());
-
-        if (!game.isOver()) {
-            modelAndView.addObject("moves", updatedMoves);
-            modelAndView.addObject("mark", game.getCurrentPlayer().getMark().toString());
+        if (isGameOver()) {
+            ModelAndView modelAndView = new ModelAndView("game_over");
+            modelAndView.addObject("winner", webUI.getWinner());
+            return modelAndView;
         } else {
-            modelAndView = new ModelAndView("game_over");
+            ModelAndView modelAndView = new ModelAndView("game");
+            modelAndView.addObject("marks", webUI.getMarks());
+            return modelAndView;
         }
-
-        return modelAndView;
     }
 
-    private String updateMoves(String moves, String position, String mark) {
-        String[] splitMoves = moves.split("-");
-        splitMoves[ParamParser.parseNumeric(position)] = mark;
-        return String.join("-", splitMoves);
+    private boolean isGameOver() {
+        return webUI.isGameOver();
+    }
+
+    private void setupGame() {
+        Game game = webUI.getGame();
+        if (game == null || game.isOver()) {
+            webUI.setupGame(DEFAULT_GAME_OPTION);
+        }
+    }
+
+    private void playGame(String position) {
+        setupGame();
+        webUI.setHumanMove(ParamParser.parseNumeric(position));
+        webUI.playGame();
+    }
+
+    public WebUI getWebUI() {
+        return webUI;
     }
 }

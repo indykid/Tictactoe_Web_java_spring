@@ -11,7 +11,9 @@ public class WebUI implements HumanInput {
 
     @Override
     public int getMove(List<Integer> list) {
-        return humanMove;
+        int move = humanMove;
+        humanMove = NULL_MOVE;
+        return move;
     }
 
     @Override
@@ -29,5 +31,31 @@ public class WebUI implements HumanInput {
 
     public Game getGame() {
         return game;
+    }
+
+    public void playGame() {
+        game.play();
+    }
+
+    public boolean isGameOver() {
+        return game.isOver();
+    }
+
+    public String[] getMarks() {
+        Mark[] moves = game.getBoard().getMoves();
+        String[] marks = new String[moves.length];
+        for (int i = 0; i < moves.length; i++) {
+            marks[i] = convertMark(moves[i]);
+        }
+        return marks;
+    }
+
+    public String convertMark(Mark mark) {
+        return mark == Mark.NONE ? "" : mark.toString();
+    }
+
+    public String getWinner() {
+        Mark mark = game.winnerMark();
+        return mark == Mark.NONE ? "" : mark.toString();
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import static org.junit.Assert.assertTrue;
 
@@ -38,19 +37,30 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     @Test
     public void getNewGame() throws Exception {
-        URL url = new URL(baseUrl + "/game");
+        response = template.getForEntity(baseUrl + "/game", String.class);
 
-        response = template.getForEntity(url.toString(), String.class);
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
+
+    @Test
+    public void getsGame() throws MalformedURLException {
+        playMoves(new String[]{"0"});
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test
     public void getsGameOver() throws MalformedURLException {
-        URL url = new URL(baseUrl + "/game?moves=X-O-X-X-O-O-O-X-NONE&position=8&mark=X");
-
-        response = template.getForEntity(url.toString(), String.class);
+        playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
+
+    private void playMoves(String[] positions) throws MalformedURLException {
+        String urlPartial = baseUrl + "/game?position=";
+        for (String position : positions) {
+            String url = urlPartial + position;
+            response = template.getForEntity(url, String.class);
+        }
     }
 }
