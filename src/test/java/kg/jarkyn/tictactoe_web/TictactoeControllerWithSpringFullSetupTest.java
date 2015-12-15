@@ -37,7 +37,7 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     @Test
     public void getNewGame() throws Exception {
-        response = template.getForEntity(baseUrl + "/game", String.class);
+        response = template.getForEntity(baseUrl + "/game?gameOption=1", String.class);
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
     }

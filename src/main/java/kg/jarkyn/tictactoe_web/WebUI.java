@@ -25,8 +25,10 @@ public class WebUI implements HumanInput {
         this.humanMove = humanMove;
     }
 
-    public void setupGame(GameOption gameOption) {
+    public void setupGame(String numericGameOption) {
+        GameOption gameOption = ParamParser.parseGameOption(numericGameOption);
         this.game = GameFactory.makeGame(new Board(), gameOption, this);
+        this.game.play();
     }
 
     public Game getGame() {

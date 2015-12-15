@@ -1,9 +1,10 @@
 package kg.jarkyn.tictactoe_web.controllers;
 
-import kg.jarkyn.Game;
 import kg.jarkyn.GameOption;
 import kg.jarkyn.tictactoe_web.ParamParser;
 import kg.jarkyn.tictactoe_web.WebUI;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,12 +13,24 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("/game")
 public class TictactoeController {
-    private static final GameOption DEFAULT_GAME_OPTION = GameOption.HUMAN_ONLY;
-    private WebUI webUI = new WebUI();
 
-    @RequestMapping(method = RequestMethod.GET)
-    public ModelAndView newGame() {
-        setupGame();
+    private final WebUI webUI;
+
+    @Autowired
+    public TictactoeController(@Qualifier("webUI") WebUI webUI) {
+        this.webUI = webUI;
+    }
+
+    @RequestMapping(value = "/select", method = RequestMethod.GET)
+    public ModelAndView selectGame() {
+        ModelAndView modelAndView = new ModelAndView("select_game");
+        modelAndView.addObject("gameOptions", GameOption.values());
+        return modelAndView;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, params = {"gameOption"})
+    public ModelAndView newGame(String gameOption) {
+        setupGame(gameOption);
         ModelAndView modelAndView = new ModelAndView("game");
         modelAndView.addObject("marks", webUI.getMarks());
         return modelAndView;
@@ -42,15 +55,11 @@ public class TictactoeController {
         return webUI.isGameOver();
     }
 
-    private void setupGame() {
-        Game game = webUI.getGame();
-        if (game == null || game.isOver()) {
-            webUI.setupGame(DEFAULT_GAME_OPTION);
-        }
+    private void setupGame(String numericGameOption) {
+        webUI.setupGame(numericGameOption);
     }
 
     private void playGame(String position) {
-        setupGame();
         webUI.setHumanMove(ParamParser.parseNumeric(position));
         webUI.playGame();
     }

@@ -13,8 +13,9 @@
         <h2>Please select game option</h2>
 
         <a class="game-option"
-           th:each="gameOption : ${gameOptions}"
-           th:text="${gameOption.readableOption()}"
+           th:each="numericGameOption : ${gameOptions}"
+           th:text="${numericGameOption.readableOption()}"
+           th:href="@{/game(gameOption=${numericGameOption.getNumericOption()})}"
         ></a>
 
     </section>

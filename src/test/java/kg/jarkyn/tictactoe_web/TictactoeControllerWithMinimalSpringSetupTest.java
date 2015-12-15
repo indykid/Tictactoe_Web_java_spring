@@ -16,24 +16,35 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 public class TictactoeControllerWithMinimalSpringSetupTest {
     private MockMvc mockMvc;
+    private WebUI webUI;
 
     @Before
     public void setUp() throws Exception {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
         viewResolver.setPrefix("/templates");
         viewResolver.setSuffix(".html");
-        mockMvc = standaloneSetup(new TictactoeController()).setViewResolvers(viewResolver).build();
+        webUI = new WebUI();
+        mockMvc = standaloneSetup(new TictactoeController(webUI)).setViewResolvers(viewResolver).build();
+    }
+
+    @Test
+    public void getsGameSelection() throws Exception {
+        mockMvc.perform(get("/game/select"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("select_game"));
     }
 
     @Test
     public void getNewGame() throws Exception {
-        mockMvc.perform(get("/game"))
+        mockMvc.perform(get("/game?gameOption=1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("game"));
     }
 
     @Test
     public void getsGame() throws Exception {
+        String hvhNumericOption = "3";
+        webUI.setupGame(hvhNumericOption);
         MvcResult result = playMoves(new String[]{"0"});
 
         ModelAndView modelAndView = result.getModelAndView();
@@ -43,6 +54,8 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
 
     @Test
     public void getsGameOver() throws Exception {
+        String hvhNumericOption = "3";
+        webUI.setupGame(hvhNumericOption);
         MvcResult result = playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
 
         ModelAndView modelAndView = result.getModelAndView();

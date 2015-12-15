@@ -1,11 +1,11 @@
 package kg.jarkyn.tictactoe_web;
 
-import kg.jarkyn.GameOption;
 import kg.jarkyn.Mark;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -53,14 +53,16 @@ public class WebUITest {
 
     @Test
     public void setsGame() {
-        ui.setupGame(GameOption.HUMAN_ONLY);
+        String numericGameOption = "1";
+        ui.setupGame(numericGameOption);
 
         assertNotNull(ui.getGame());
     }
 
     @Test
     public void playsGame() {
-        ui.setupGame(GameOption.HUMAN_ONLY);
+        String numericGameOption = "3";
+        ui.setupGame(numericGameOption);
         ui.setHumanMove(0);
 
         ui.playGame();
@@ -69,18 +71,20 @@ public class WebUITest {
     }
 
     @Test
-    public void gameIsNotOver() {
-        ui.setupGame(GameOption.HUMAN_ONLY);
-
-        assertFalse(ui.isGameOver());
-    }
-
-    @Test
     public void gameIsOver() {
-        ui.setupGame(GameOption.AI_ONLY);
+        String aiVsAiNuericOption = "4";
+        ui.setupGame(aiVsAiNuericOption);
         ui.getGame().play();
 
         assertTrue(ui.isGameOver());
+    }
+
+    @Test
+    public void gameIsNotOver() {
+        String hvhNumericOption = "3";
+        ui.setupGame(hvhNumericOption);
+
+        assertFalse(ui.isGameOver());
     }
 
     @Test
@@ -95,7 +99,8 @@ public class WebUITest {
 
     @Test
     public void getsMarks() {
-        ui.setupGame(GameOption.HUMAN_ONLY);
+        String numericGameOption = "3";
+        ui.setupGame(numericGameOption);
         ui.setHumanMove(0);
 
         ui.playGame();
@@ -105,9 +110,22 @@ public class WebUITest {
 
     @Test
     public void getsNoWinner() {
-        ui.setupGame(GameOption.AI_ONLY);
+        String numericGameOption = "1";
+        ui.setupGame(numericGameOption);
         ui.getGame().play();
 
         assertEquals("", ui.getWinner());
+    }
+
+    @Test
+    public void playsAiMove() {
+        String aiVsHumanNumericOption = "1";
+        ui.setupGame(aiVsHumanNumericOption);
+
+        assertTrue(contain(ui.getMarks(), "X"));
+    }
+
+    private boolean contain(String[] marks, String mark) {
+        return Arrays.asList(marks).indexOf(mark) != -1;
     }
 }
