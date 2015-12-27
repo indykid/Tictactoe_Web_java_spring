@@ -88,6 +88,11 @@ a {
     margin: 0;
     }
 
+.status {
+    color: magenta;
+    font-weight: bold;
+    }
+
 .cf:before,
 .cf:after {
     content: " "; /* 1 */
