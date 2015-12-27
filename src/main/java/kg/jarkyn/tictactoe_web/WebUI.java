@@ -63,11 +63,7 @@ public class WebUI implements HumanInput {
 
     public String formatStatus() {
         if (game.isOver()) {
-            if (game.isWon()) {
-                return "Player " + game.winnerMark() + " has won this game!";
-            } else {
-                return "It's a draw!";
-            }
+            return game.isWon() ? "Player " + game.winnerMark() + " won!" : "It's a draw!";
         } else {
             return "Active";
         }

@@ -13,6 +13,9 @@ import static org.junit.Assert.*;
 public class WebUITest {
 
     private WebUI ui;
+    private final String hvhOption = "3";
+    private final String cvhOption = "1";
+    private final String cvcOption = "4";
 
     @Before
     public void setUp() {
@@ -53,16 +56,14 @@ public class WebUITest {
 
     @Test
     public void setsGame() {
-        String numericGameOption = "1";
-        ui.setupGame(numericGameOption);
+        ui.setupGame(cvhOption);
 
         assertNotNull(ui.getGame());
     }
 
     @Test
     public void playsGame() {
-        String numericGameOption = "3";
-        ui.setupGame(numericGameOption);
+        ui.setupGame(hvhOption);
         ui.setHumanMove(0);
 
         ui.playGame();
@@ -72,8 +73,7 @@ public class WebUITest {
 
     @Test
     public void gameIsOver() {
-        String aiVsAiNumericOption = "4";
-        ui.setupGame(aiVsAiNumericOption);
+        ui.setupGame(cvcOption);
         ui.getGame().play();
 
         assertTrue(ui.isGameOver());
@@ -81,8 +81,7 @@ public class WebUITest {
 
     @Test
     public void gameIsNotOver() {
-        String hvhNumericOption = "3";
-        ui.setupGame(hvhNumericOption);
+        ui.setupGame(hvhOption);
 
         assertFalse(ui.isGameOver());
     }
@@ -99,8 +98,7 @@ public class WebUITest {
 
     @Test
     public void getsMarks() {
-        String humanVsHumannNumericOption = "3";
-        ui.setupGame(humanVsHumannNumericOption);
+        ui.setupGame(hvhOption);
         ui.setHumanMove(0);
 
         ui.playGame();
@@ -110,8 +108,7 @@ public class WebUITest {
 
     @Test
     public void getsNoWinner() {
-        String aiVsHumanNumericOption = "1";
-        ui.setupGame(aiVsHumanNumericOption);
+        ui.setupGame(cvhOption);
         ui.getGame().play();
 
         assertEquals("", ui.getWinner());
@@ -119,16 +116,14 @@ public class WebUITest {
 
     @Test
     public void playsAiMove() {
-        String aiVsHumanNumericOption = "1";
-        ui.setupGame(aiVsHumanNumericOption);
+        ui.setupGame(cvhOption);
 
         assertTrue(contains("X", ui.getMarks()));
     }
 
     @Test
     public void formatsGameActiveStatus(){
-        String aiVsHumanNumericOption = "1";
-        ui.setupGame(aiVsHumanNumericOption);
+        ui.setupGame(cvhOption);
         ui.playGame();
 
         assertEquals("Active", ui.formatStatus());
@@ -136,8 +131,7 @@ public class WebUITest {
 
     @Test
     public void formatsDrawStatus() {
-        String aiVsAiNumericOption = "4";
-        ui.setupGame(aiVsAiNumericOption);
+        ui.setupGame(cvcOption);
         ui.getGame().play();
 
         assertEquals("It's a draw!", ui.formatStatus());
@@ -145,11 +139,10 @@ public class WebUITest {
 
     @Test
     public void formatsGameWonStatus() {
-        String humanVsHumanNumericOption = "3";
-        ui.setupGame(humanVsHumanNumericOption);
+        ui.setupGame(hvhOption);
         playMoves(Arrays.asList(0, 1, 3, 4, 6));
 
-        assertEquals("Player X has won this game!", ui.formatStatus());
+        assertEquals("Player X won!", ui.formatStatus());
     }
 
     private void playMoves(List<Integer> moves) {

@@ -36,6 +36,13 @@ public class TictactoeControllerWithSpringFullSetupTest {
     }
 
     @Test
+    public void getsGameSelection() {
+        response = template.getForEntity(baseUrl + "/game/select", String.class);
+
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
+
+    @Test
     public void getNewGame() throws Exception {
         response = template.getForEntity(baseUrl + "/game?gameOption=1", String.class);
 
@@ -44,8 +51,8 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     @Test
     public void getsGame() throws MalformedURLException {
-        String hvhNumericOption = "3";
-        template.getForEntity(baseUrl + "/game?gameOption=" + hvhNumericOption, String.class);
+        String hvhOption = "3";
+        template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
 
         playMoves(new String[]{"0"});
 

@@ -5,7 +5,6 @@ import kg.jarkyn.GameOption;
 import kg.jarkyn.HumanPlayer;
 import kg.jarkyn.tictactoe_web.controllers.TictactoeController;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -17,10 +16,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 public class TictactoeControllerWithMinimalSpringSetupTest {
+    private final String cvhOption = "1";
+    private final String hvhOption = "3";
     private MockMvc mockMvc;
     private WebUI webUI;
-    private String cvhOption = "1";
-    private final String hvhOption = "3";
+    private MvcResult result;
 
     @Before
     public void setUp() throws Exception {
@@ -33,8 +33,7 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
 
     @Test
     public void getsGameSelection() throws Exception {
-        String url = "/game/select";
-        MvcResult result = mockMvc.perform(get(url)).andReturn();
+        sendGet("/game/select");
 
         ModelAndView modelAndView = result.getModelAndView();
         assertEquals(200, result.getResponse().getStatus());
@@ -44,16 +43,14 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
 
     @Test
     public void setsGame() throws Exception {
-        String url = "/game?gameOption=" + cvhOption;
-        mockMvc.perform(get(url));
+        sendGet("/game?gameOption=" + cvhOption);
 
         assertNotNull(webUI.getGame());
     }
 
     @Test
     public void setsCorrectGame() throws Exception {
-        String url = "/game?gameOption=" + cvhOption;
-        mockMvc.perform(get(url));
+        sendGet("/game?gameOption=" + cvhOption);
 
         assertTrue(webUI.getGame().getPlayerX() instanceof AiPlayer);
         assertTrue(webUI.getGame().getPlayerO() instanceof HumanPlayer);
@@ -61,8 +58,7 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
 
     @Test
     public void getNewGame() throws Exception {
-        String url = "/game?gameOption=" + cvhOption;
-        MvcResult result = mockMvc.perform(get(url)).andReturn();
+        sendGet("/game?gameOption=" + cvhOption);
 
         ModelAndView modelAndView = result.getModelAndView();
         assertEquals(200, result.getResponse().getStatus());
@@ -72,48 +68,38 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
     }
 
     @Test
-    @Ignore
-    public void playsReceivedMove() throws Exception {
-        webUI.setupGame(hvhOption);
-        String url = "/game?position=0";
-
-        mockMvc.perform(get(url));
-
-        assertFalse(webUI.getGame().getBoard().isValidMove(0));
-    }
-
-    @Test
     public void getsGame() throws Exception {
         webUI.setupGame(hvhOption);
 
-        MvcResult result = playMoves(new String[]{"0"});
+        playMoves(new String[]{"0"});
 
         ModelAndView modelAndView = result.getModelAndView();
         assertEquals(200, result.getResponse().getStatus());
         assertEquals("game", modelAndView.getViewName());
         assertEquals("Active", modelAndView.getModel().get("status"));
-        assertArrayEquals(new String[]{"X", "", "", "", "", "", "", "", ""}, webUI.getMarks());
+        assertArrayEquals((Object[]) modelAndView.getModel().get("marks"), webUI.getMarks());
     }
 
     @Test
     public void getsGameOver() throws Exception {
         webUI.setupGame(hvhOption);
 
-        MvcResult result = playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
+        playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
 
         ModelAndView modelAndView = result.getModelAndView();
         assertEquals("game", modelAndView.getViewName());
         assertEquals("It's a draw!", modelAndView.getModel().get("status"));
-        assertArrayEquals(new String[]{"X", "O", "X", "X", "O", "O", "O", "X", "X"}, webUI.getMarks());
+        assertArrayEquals((Object[]) modelAndView.getModel().get("marks"), webUI.getMarks());
     }
 
-    private MvcResult playMoves(String[] positions) throws Exception {
-        MvcResult result = null;
+    private void playMoves(String[] positions) throws Exception {
         String urlPartial = "/game?position=";
         for (String position : positions) {
-            String url = urlPartial + position;
-            result = mockMvc.perform(get(url)).andReturn();
+            sendGet(urlPartial + position);
         }
-        return result;
+    }
+
+    private void sendGet(String url) throws Exception {
+        result = mockMvc.perform(get(url)).andReturn();
     }
 }
