@@ -72,8 +72,8 @@ public class WebUITest {
 
     @Test
     public void gameIsOver() {
-        String aiVsAiNuericOption = "4";
-        ui.setupGame(aiVsAiNuericOption);
+        String aiVsAiNumericOption = "4";
+        ui.setupGame(aiVsAiNumericOption);
         ui.getGame().play();
 
         assertTrue(ui.isGameOver());
@@ -99,8 +99,8 @@ public class WebUITest {
 
     @Test
     public void getsMarks() {
-        String numericGameOption = "3";
-        ui.setupGame(numericGameOption);
+        String humanVsHumannNumericOption = "3";
+        ui.setupGame(humanVsHumannNumericOption);
         ui.setHumanMove(0);
 
         ui.playGame();
@@ -110,8 +110,8 @@ public class WebUITest {
 
     @Test
     public void getsNoWinner() {
-        String numericGameOption = "1";
-        ui.setupGame(numericGameOption);
+        String aiVsHumanNumericOption = "1";
+        ui.setupGame(aiVsHumanNumericOption);
         ui.getGame().play();
 
         assertEquals("", ui.getWinner());
@@ -122,10 +122,44 @@ public class WebUITest {
         String aiVsHumanNumericOption = "1";
         ui.setupGame(aiVsHumanNumericOption);
 
-        assertTrue(contain(ui.getMarks(), "X"));
+        assertTrue(contains("X", ui.getMarks()));
     }
 
-    private boolean contain(String[] marks, String mark) {
+    @Test
+    public void formatsGameActiveStatus(){
+        String aiVsHumanNumericOption = "1";
+        ui.setupGame(aiVsHumanNumericOption);
+        ui.playGame();
+
+        assertEquals("Active", ui.formatStatus());
+    }
+
+    @Test
+    public void formatsDrawStatus() {
+        String aiVsAiNumericOption = "4";
+        ui.setupGame(aiVsAiNumericOption);
+        ui.getGame().play();
+
+        assertEquals("It's a draw!", ui.formatStatus());
+    }
+
+    @Test
+    public void formatsGameWonStatus() {
+        String humanVsHumanNumericOption = "3";
+        ui.setupGame(humanVsHumanNumericOption);
+        playMoves(Arrays.asList(0, 1, 3, 4, 6));
+
+        assertEquals("Player X has won this game!", ui.formatStatus());
+    }
+
+    private void playMoves(List<Integer> moves) {
+        for (int move : moves) {
+            ui.setHumanMove(move);
+            ui.playGame();
+        }
+    }
+
+    private boolean contains(String mark, String[] marks) {
         return Arrays.asList(marks).indexOf(mark) != -1;
     }
 }

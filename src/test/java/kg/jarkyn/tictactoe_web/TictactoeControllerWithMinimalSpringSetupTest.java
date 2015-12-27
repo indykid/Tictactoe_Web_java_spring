@@ -52,18 +52,6 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
         assertEquals("game", modelAndView.getViewName());
     }
 
-    @Test
-    public void getsGameOver() throws Exception {
-        String hvhNumericOption = "3";
-        webUI.setupGame(hvhNumericOption);
-        MvcResult result = playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
-
-        ModelAndView modelAndView = result.getModelAndView();
-        assertEquals(200, result.getResponse().getStatus());
-        assertEquals("game_over", modelAndView.getViewName());
-        assertEquals("", modelAndView.getModel().get("winner"));
-    }
-
     private MvcResult playMoves(String[] positions) throws Exception {
         MvcResult result = null;
         String urlPartial = "/game?position=";

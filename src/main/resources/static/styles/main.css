@@ -12,7 +12,12 @@ body {
 
 main {
     margin: 0 auto;
-    width: 800px;
+    width: 960px;
+    }
+
+aside {
+    float: left;
+    width: 180px;
     }
 
 h1 {
@@ -55,8 +60,9 @@ a {
     }
 
 .grid {
-    width: 600px;
-    margin: 0 auto;
+    width: 780px;
+    padding-left: 180px;
+    float: left;
     }
 
 .cell {

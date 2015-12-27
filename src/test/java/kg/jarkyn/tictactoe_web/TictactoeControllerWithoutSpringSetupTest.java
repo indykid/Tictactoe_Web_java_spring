@@ -48,7 +48,8 @@ public class TictactoeControllerWithoutSpringSetupTest {
         modelAndView = controller.newGame(gameOption);
 
         assertEquals("game", modelAndView.getViewName());
-        assertEquals(modelAndView.getModel().get("marks"), getWebUI().getMarks());
+        assertArrayEquals((Object[]) modelAndView.getModel().get("marks"), getWebUI().getMarks());
+        assertEquals("Active", modelAndView.getModel().get("status"));
     }
 
     @Test
@@ -71,6 +72,7 @@ public class TictactoeControllerWithoutSpringSetupTest {
         assertEquals("game", modelAndView.getViewName());
         assertNotNull(modelAndView.getModel().get("marks"));
         assertArrayEquals(new String[]{"X", "", "", "", "", "", "", "", ""}, getWebUI().getMarks());
+        assertEquals("Active", modelAndView.getModel().get("status"));
     }
 
     @Test
@@ -80,8 +82,8 @@ public class TictactoeControllerWithoutSpringSetupTest {
 
         playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
 
-        assertEquals("game_over", modelAndView.getViewName());
-        assertEquals("", modelAndView.getModel().get("winner"));
+        assertEquals("game", modelAndView.getViewName());
+        assertEquals("It's a draw!", modelAndView.getModel().get("status"));
     }
 
     private void playMoves(String[] moves) {
