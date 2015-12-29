@@ -2,10 +2,12 @@ package kg.jarkyn.tictactoe_web.controllers;
 
 import kg.jarkyn.GameOption;
 import kg.jarkyn.tictactoe_web.ParamParser;
+import kg.jarkyn.tictactoe_web.Repository;
 import kg.jarkyn.tictactoe_web.WebUI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -14,11 +16,11 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/game")
 public class TictactoeController {
 
-    private final WebUI webUI;
+    private final Repository repo;
 
     @Autowired
-    public TictactoeController(@Qualifier("webUI") WebUI webUI) {
-        this.webUI = webUI;
+    public TictactoeController(@Qualifier("repo") Repository repo) {
+        this.repo = repo;
     }
 
     @RequestMapping(value = "/select", method = RequestMethod.GET)
@@ -30,40 +32,37 @@ public class TictactoeController {
 
     @RequestMapping(method = RequestMethod.GET, params = {"gameOption"})
     public ModelAndView newGame(String gameOption) {
-        setupGame(gameOption);
+        WebUI webUI = setupWebGame(gameOption);
+        return new ModelAndView("redirect:/game/" + webUI.hashCode());
+    }
+
+    @RequestMapping(value="/{webUIId}", method = RequestMethod.GET)
+    public ModelAndView game(@PathVariable("webUIId") int webUIId) {
+        WebUI webUI = repo.find(webUIId);
+
         ModelAndView modelAndView = new ModelAndView("game");
         modelAndView.addObject("marks", webUI.getMarks());
-        modelAndView.addObject("status", webUI.formatStatus());
+        modelAndView.addObject("webUIId", webUIId);
+        modelAndView.addObject("gameStatus", webUI.formatGameStatus());
         return modelAndView;
     }
 
-    @RequestMapping(method = RequestMethod.GET, params = {"position"})
-    public ModelAndView game(String position) {
-        playGame(position);
-
-        ModelAndView modelAndView = new ModelAndView("game");
-        if (isGameOver()) {
-            modelAndView.addObject("winner", webUI.getWinner());
-        }
-        modelAndView.addObject("marks", webUI.getMarks());
-        modelAndView.addObject("status", webUI.formatStatus());
-        return modelAndView;
+    @RequestMapping(value="/{webUIId}", method = RequestMethod.GET, params = {"position"})
+    public ModelAndView game(@PathVariable("webUIId") int webUIId, String position) {
+        WebUI webUI = repo.find(webUIId);
+        playGame(webUI, position);
+        return new ModelAndView("redirect:/game/" + webUI.hashCode());
     }
 
-    private boolean isGameOver() {
-        return webUI.isGameOver();
-    }
-
-    private void setupGame(String numericGameOption) {
+    private WebUI setupWebGame(String numericGameOption) {
+        WebUI webUI = new WebUI();
         webUI.setupGame(numericGameOption);
+        int id = repo.save(webUI);
+        return repo.find(id);
     }
 
-    private void playGame(String position) {
+    private void playGame(WebUI webUI, String position) {
         webUI.setHumanMove(ParamParser.parseNumeric(position));
         webUI.playGame();
-    }
-
-    public WebUI getWebUI() {
-        return webUI;
     }
 }

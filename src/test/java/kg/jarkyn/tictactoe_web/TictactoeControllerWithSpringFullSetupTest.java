@@ -1,5 +1,7 @@
 package kg.jarkyn.tictactoe_web;
 
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,25 +54,37 @@ public class TictactoeControllerWithSpringFullSetupTest {
     @Test
     public void getsGame() throws MalformedURLException {
         String hvhOption = "3";
-        template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
+        ResponseEntity newGameResponse = template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
+        String url = baseUrl + findUrl(newGameResponse);
 
-        playMoves(new String[]{"0"});
+        response = template.getForEntity(url, String.class);
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test
     public void getsGameOver() throws MalformedURLException {
-        playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
+        String hvhOption = "3";
+        ResponseEntity newGameResponse = template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
+
+        response = playAllMoves(newGameResponse);
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
-    private void playMoves(String[] positions) throws MalformedURLException {
-        String urlPartial = baseUrl + "/game?position=";
+    private ResponseEntity<String> playAllMoves(ResponseEntity lastResponse) {
+        String[] positions = new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"};
+        String url = baseUrl + findUrl(lastResponse) + "?position=";
+
         for (String position : positions) {
-            String url = urlPartial + position;
-            response = template.getForEntity(url, String.class);
+            response = template.getForEntity(url + position, String.class);
         }
+        return response;
+    }
+
+    private String findUrl(ResponseEntity response) {
+        Elements elements = Jsoup.parse(response.toString()).select("a.position");
+        String[] urlParts = elements.attr("href").split("\\?");
+        return urlParts[0];
     }
 }

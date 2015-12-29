@@ -52,16 +52,11 @@ public class WebUI implements HumanInput {
         return marks;
     }
 
-    public String convertMark(Mark mark) {
+    private String convertMark(Mark mark) {
         return mark == Mark.NONE ? "" : mark.toString();
     }
 
-    public String getWinner() {
-        Mark mark = game.winnerMark();
-        return mark == Mark.NONE ? "" : mark.toString();
-    }
-
-    public String formatStatus() {
+    public String formatGameStatus() {
         if (game.isOver()) {
             return game.isWon() ? "Player " + game.winnerMark() + " won!" : "It's a draw!";
         } else {

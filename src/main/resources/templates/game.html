@@ -10,8 +10,10 @@
     <main class="cf">
         <section class="grid cf">
             <div th:each="mark, iterStat : ${marks}" class="cell">
-                <p th:if="${mark.isEmpty() and status != 'Active'}"></p>
-                <a th:if="${mark.isEmpty() and status == 'Active'}" th:href="@{/game(position=${iterStat.index})}"></a>
+                <p th:if="${mark.isEmpty() and gameStatus != 'Active'}"></p>
+                <a th:if="${mark.isEmpty() and gameStatus == 'Active'}"
+                   th:href="@{'/game/' + ${webUIId}(position=${iterStat.index})}"
+                        class="position"></a>
 
                 <p th:if="${!mark.isEmpty()}" th:text="${mark}"></p>
             </div>
@@ -19,7 +21,7 @@
         <aside>
             <section class="space-medium">
                 <h3>Game status:</h3>
-                <p th:text="${status}" class="status"></p>
+                <p th:text="${gameStatus}" class="status"></p>
             </section>
             <section>
                 <a th:href="@{/game/select}">Play new game</a>

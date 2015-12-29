@@ -1,5 +1,7 @@
 package kg.jarkyn.tictactoe_web;
 
+import kg.jarkyn.AiPlayer;
+import kg.jarkyn.HumanPlayer;
 import kg.jarkyn.Mark;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +15,8 @@ import static org.junit.Assert.*;
 public class WebUITest {
 
     private WebUI ui;
-    private final String hvhOption = "3";
     private final String cvhOption = "1";
+    private final String hvhOption = "3";
     private final String cvcOption = "4";
 
     @Before
@@ -62,21 +64,20 @@ public class WebUITest {
     }
 
     @Test
-    public void playsGame() {
-        ui.setupGame(hvhOption);
-        ui.setHumanMove(0);
+    public void setsCorrectGame() throws Exception {
+        ui.setupGame(cvhOption);
 
-        ui.playGame();
-
-        assertFalse(ui.getGame().getBoard().isValidMove(0));
+        assertTrue(ui.getGame().getPlayerX() instanceof AiPlayer);
+        assertTrue(ui.getGame().getPlayerO() instanceof HumanPlayer);
     }
 
     @Test
-    public void gameIsOver() {
-        ui.setupGame(cvcOption);
-        ui.getGame().play();
+    public void placesPlayedMovesOnTheBoard() {
+        ui.setupGame(hvhOption);
 
-        assertTrue(ui.isGameOver());
+        playMoves(Arrays.asList(0));
+
+        assertNotEquals(Mark.NONE, ui.getGame().getBoard().markAt(0));
     }
 
     @Test
@@ -87,31 +88,12 @@ public class WebUITest {
     }
 
     @Test
-    public void convertsX() {
-        assertEquals("X", ui.convertMark(Mark.X));
-    }
-
-    @Test
-    public void convertsNONE() {
-        assertEquals("", ui.convertMark(Mark.NONE));
-    }
-
-    @Test
-    public void getsMarks() {
-        ui.setupGame(hvhOption);
-        ui.setHumanMove(0);
+    public void gameIsOver() {
+        ui.setupGame(cvcOption);
 
         ui.playGame();
 
-        assertArrayEquals(new String[]{"X", "", "", "", "", "", "", "", ""}, ui.getMarks());
-    }
-
-    @Test
-    public void getsNoWinner() {
-        ui.setupGame(cvhOption);
-        ui.getGame().play();
-
-        assertEquals("", ui.getWinner());
+        assertTrue(ui.isGameOver());
     }
 
     @Test
@@ -122,19 +104,27 @@ public class WebUITest {
     }
 
     @Test
+    public void getsMarks() {
+        ui.setupGame(hvhOption);
+
+        playMoves(Arrays.asList(0));
+
+        assertArrayEquals(new String[]{"X", "", "", "", "", "", "", "", ""}, ui.getMarks());
+    }
+
+    @Test
     public void formatsGameActiveStatus(){
         ui.setupGame(cvhOption);
-        ui.playGame();
 
-        assertEquals("Active", ui.formatStatus());
+        assertEquals("Active", ui.formatGameStatus());
     }
 
     @Test
     public void formatsDrawStatus() {
         ui.setupGame(cvcOption);
-        ui.getGame().play();
+        ui.playGame();
 
-        assertEquals("It's a draw!", ui.formatStatus());
+        assertEquals("It's a draw!", ui.formatGameStatus());
     }
 
     @Test
@@ -142,7 +132,7 @@ public class WebUITest {
         ui.setupGame(hvhOption);
         playMoves(Arrays.asList(0, 1, 3, 4, 6));
 
-        assertEquals("Player X won!", ui.formatStatus());
+        assertEquals("Player X won!", ui.formatGameStatus());
     }
 
     private void playMoves(List<Integer> moves) {

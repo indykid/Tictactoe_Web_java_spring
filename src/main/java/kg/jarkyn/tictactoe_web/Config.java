@@ -14,4 +14,9 @@ public class Config {
     public WebUI webUI() {
         return new WebUI();
     }
+
+    @Bean
+    public Repository repo() {
+        return new Repository();
+    }
 }
