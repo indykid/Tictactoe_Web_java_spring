@@ -77,7 +77,7 @@ public class WebUITest {
 
         playMoves(Arrays.asList(0));
 
-        assertNotEquals(Mark.NONE, ui.getGame().getBoard().markAt(0));
+        assertEquals(Mark.X, ui.getGame().getBoard().markAt(0));
     }
 
     @Test
@@ -89,27 +89,20 @@ public class WebUITest {
 
     @Test
     public void gameIsOver() {
-        ui.setupGame(cvcOption);
+        ui.setupGame(hvhOption);
 
-        ui.playGame();
+        playMoves(Arrays.asList(0, 4, 3, 6, 2, 1, 7, 5, 8));
 
         assertTrue(ui.isGameOver());
     }
 
     @Test
-    public void playsAiMove() {
-        ui.setupGame(cvhOption);
-
-        assertTrue(contains("X", ui.getMarks()));
-    }
-
-    @Test
-    public void getsMarks() {
+    public void formatsMarks() {
         ui.setupGame(hvhOption);
 
         playMoves(Arrays.asList(0));
 
-        assertArrayEquals(new String[]{"X", "", "", "", "", "", "", "", ""}, ui.getMarks());
+        assertEquals(Arrays.asList("X", "", "", "", "", "", "", "", ""), ui.formatMarks());
     }
 
     @Test
@@ -121,8 +114,9 @@ public class WebUITest {
 
     @Test
     public void formatsDrawStatus() {
-        ui.setupGame(cvcOption);
-        ui.playGame();
+        ui.setupGame(hvhOption);
+
+        playMoves(Arrays.asList(0, 4, 3, 6, 2, 1, 7, 5, 8));
 
         assertEquals("It's a draw!", ui.formatGameStatus());
     }
@@ -130,9 +124,41 @@ public class WebUITest {
     @Test
     public void formatsGameWonStatus() {
         ui.setupGame(hvhOption);
+
         playMoves(Arrays.asList(0, 1, 3, 4, 6));
 
         assertEquals("Player X won!", ui.formatGameStatus());
+    }
+
+    @Test
+    public void notAiTurn() {
+        ui.setupGame(hvhOption);
+
+        assertFalse(ui.isAiTurn());
+    }
+
+    @Test
+    public void isAiTurn() {
+        ui.setupGame(cvcOption);
+
+
+
+        assertTrue(ui.isAiTurn());
+    }
+
+    @Test
+    public void notAiTurnWhenOver() {
+        ui.setupGame(cvcOption);
+
+        playAllAiMoves();
+
+        assertFalse(ui.isAiTurn());
+    }
+
+    private void playAllAiMoves() {
+        for (int i = 0; i < ui.getGame().getBoard().getSize(); i++) {
+            ui.playGame();
+        }
     }
 
     private void playMoves(List<Integer> moves) {
@@ -140,9 +166,5 @@ public class WebUITest {
             ui.setHumanMove(move);
             ui.playGame();
         }
-    }
-
-    private boolean contains(String mark, String[] marks) {
-        return Arrays.asList(marks).indexOf(mark) != -1;
     }
 }

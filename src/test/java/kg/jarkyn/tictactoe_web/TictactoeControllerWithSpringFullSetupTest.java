@@ -30,6 +30,8 @@ public class TictactoeControllerWithSpringFullSetupTest {
     private String baseUrl;
     private RestTemplate template;
     private ResponseEntity<String> response;
+    private final String hvhOption = "3";
+    private final String cvcOption = "4";
 
     @Before
     public void setUp() throws Exception {
@@ -53,7 +55,6 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     @Test
     public void getsGame() throws MalformedURLException {
-        String hvhOption = "3";
         ResponseEntity newGameResponse = template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
         String url = baseUrl + findUrl(newGameResponse);
 
@@ -64,7 +65,6 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     @Test
     public void getsGameOver() throws MalformedURLException {
-        String hvhOption = "3";
         ResponseEntity newGameResponse = template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
 
         response = playAllMoves(newGameResponse);

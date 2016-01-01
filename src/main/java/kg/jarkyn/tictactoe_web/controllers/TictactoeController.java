@@ -32,16 +32,20 @@ public class TictactoeController {
 
     @RequestMapping(method = RequestMethod.GET, params = {"gameOption"})
     public ModelAndView newGame(String gameOption) {
-        WebUI webUI = setupWebGame(gameOption);
+        int id = setupWebGame(gameOption);
+        WebUI webUI = repo.find(id);
         return new ModelAndView("redirect:/game/" + webUI.hashCode());
     }
 
     @RequestMapping(value="/{webUIId}", method = RequestMethod.GET)
     public ModelAndView game(@PathVariable("webUIId") int webUIId) {
         WebUI webUI = repo.find(webUIId);
+        webUI.playGame();
 
         ModelAndView modelAndView = new ModelAndView("game");
-        modelAndView.addObject("marks", webUI.getMarks());
+
+        modelAndView.addObject("aiTurn", isAiTurn(webUI));
+        modelAndView.addObject("marks", webUI.formatMarks());
         modelAndView.addObject("webUIId", webUIId);
         modelAndView.addObject("gameStatus", webUI.formatGameStatus());
         return modelAndView;
@@ -50,19 +54,17 @@ public class TictactoeController {
     @RequestMapping(value="/{webUIId}", method = RequestMethod.GET, params = {"position"})
     public ModelAndView game(@PathVariable("webUIId") int webUIId, String position) {
         WebUI webUI = repo.find(webUIId);
-        playGame(webUI, position);
+        webUI.setHumanMove(ParamParser.parseNumeric(position));
         return new ModelAndView("redirect:/game/" + webUI.hashCode());
     }
 
-    private WebUI setupWebGame(String numericGameOption) {
+    private int setupWebGame(String numericGameOption) {
         WebUI webUI = new WebUI();
         webUI.setupGame(numericGameOption);
-        int id = repo.save(webUI);
-        return repo.find(id);
+        return repo.save(webUI);
     }
 
-    private void playGame(WebUI webUI, String position) {
-        webUI.setHumanMove(ParamParser.parseNumeric(position));
-        webUI.playGame();
+    private boolean isAiTurn(WebUI webUI) {
+        return webUI.isAiTurn();
     }
 }

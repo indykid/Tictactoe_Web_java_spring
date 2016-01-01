@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -16,6 +18,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 public class TictactoeControllerWithMinimalSpringSetupTest {
     private final String cvhOption = "1";
     private final String hvhOption = "3";
+    private final String cvcOption = "4";
     private MockMvc mockMvc;
     private WebUI webUI;
     private Repository repo;
@@ -75,12 +78,43 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
         assertEquals(200, result.getResponse().getStatus());
         assertEquals("game", modelAndView.getViewName());
         assertEquals("Active", modelAndView.getModel().get("gameStatus"));
+        assertFalse((boolean) modelAndView.getModel().get("aiTurn"));
         assertEquals(id, modelAndView.getModel().get("webUIId"));
-        assertArrayEquals((Object[]) modelAndView.getModel().get("marks"), repo.find(id).getMarks());
+        assertEquals(modelAndView.getModel().get("marks"), repo.find(id).formatMarks());
     }
 
     @Test
-    public void playsSpecificGame() throws Exception {
+    public void isAiTurn() throws Exception {
+        setupWebUI(cvcOption);
+        int id = repo.getLastId();
+
+        result = sendGet("/game/" + id);
+
+        ModelAndView modelAndView = result.getModelAndView();
+        assertTrue((boolean) modelAndView.getModel().get("aiTurn"));
+    }
+
+    @Test
+    public void playsAiMove() throws Exception {
+        setupWebUI(cvhOption);
+        int id = repo.getLastId();
+
+        result = sendGet("/game/" + id);
+
+        ModelAndView modelAndView = result.getModelAndView();
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals("game", modelAndView.getViewName());
+        assertEquals("Active", modelAndView.getModel().get("gameStatus"));
+        assertFalse((boolean) modelAndView.getModel().get("aiTurn"));
+        assertEquals(id, modelAndView.getModel().get("webUIId"));
+        List<String> marks = repo.find(id).formatMarks();
+        assertEquals(modelAndView.getModel().get("marks"), marks);
+        assertTrue(marks.contains("X"));
+        assertFalse(marks.contains("O"));
+    }
+
+    @Test
+    public void playsHumanMoves() throws Exception {
         setupWebUI(hvhOption);
         int id = repo.getLastId();
 
@@ -103,8 +137,9 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
         assertEquals(200, result.getResponse().getStatus());
         assertEquals("game", modelAndView.getViewName());
         assertEquals("It's a draw!", modelAndView.getModel().get("gameStatus"));
+        assertFalse((boolean) modelAndView.getModel().get("aiTurn"));
         assertEquals(id, modelAndView.getModel().get("webUIId"));
-        assertArrayEquals((Object[]) modelAndView.getModel().get("marks"), repo.find(id).getMarks());
+        assertEquals(modelAndView.getModel().get("marks"), repo.find(id).formatMarks());
     }
 
     @Test
@@ -131,9 +166,11 @@ public class TictactoeControllerWithMinimalSpringSetupTest {
     }
 
     private void playMoves(int webUIId, String[] positions) throws Exception {
-        String urlPartial = "/game/" + webUIId + "?position=";
+        String gameUrl = "/game/" + webUIId;
+        String urlPartial = gameUrl + "?position=";
         for (String position : positions) {
-            result = sendGet(urlPartial + position);
+            sendGet(urlPartial + position);
+            result = sendGet(gameUrl);
         }
     }
 
