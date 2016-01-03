@@ -2,12 +2,14 @@ package kg.jarkyn.tictactoe_web;
 
 import kg.jarkyn.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WebUI implements HumanInput {
     private static final int NULL_MOVE = -1;
     private int humanMove = NULL_MOVE;
     private Game game;
+    private GameOption gameOption;
 
     @Override
     public int getMove(List<Integer> list) {
@@ -26,9 +28,8 @@ public class WebUI implements HumanInput {
     }
 
     public void setupGame(String numericGameOption) {
-        GameOption gameOption = ParamParser.parseGameOption(numericGameOption);
-        this.game = GameFactory.makeGame(new Board(), gameOption, this);
-        this.game.play();
+        gameOption = ParamParser.parseGameOption(numericGameOption);
+        game = GameFactory.makeGame(new Board(), gameOption, this);
     }
 
     public Game getGame() {
@@ -43,21 +44,28 @@ public class WebUI implements HumanInput {
         return game.isOver();
     }
 
-    public String[] getMarks() {
+    public List<String> formatMarks() {
         Mark[] moves = game.getBoard().getMoves();
-        String[] marks = new String[moves.length];
+        List<String> marks = new ArrayList<>();
         for (int i = 0; i < moves.length; i++) {
-            marks[i] = convertMark(moves[i]);
+            marks.add(i, convertMark(moves[i]));
         }
         return marks;
     }
 
-    public String convertMark(Mark mark) {
+    private String convertMark(Mark mark) {
         return mark == Mark.NONE ? "" : mark.toString();
     }
 
-    public String getWinner() {
-        Mark mark = game.winnerMark();
-        return mark == Mark.NONE ? "" : mark.toString();
+    public String formatGameStatus() {
+        if (game.isOver()) {
+            return game.isWon() ? "Player " + game.winnerMark() + " won!" : "It's a draw!";
+        } else {
+            return "Active";
+        }
+    }
+
+    public boolean isAiTurn() {
+        return !game.isOver() && game.getCurrentPlayer() instanceof AiPlayer;
     }
 }
