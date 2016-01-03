@@ -2,19 +2,32 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
+    <meta th:if="${aiTurn}" http-equiv="refresh" content="1"/>
     <title>Play Tic Tac Toe</title>
     <link rel="stylesheet" href="/styles/main.css"/>
 </head>
 <body>
     <h1 class="space-medium">Tic Tac Toe</h1>
-    <main>
+    <main class="cf">
         <section class="grid cf">
             <div th:each="mark, iterStat : ${marks}" class="cell">
-                <a th:if="${mark.isEmpty()}" th:href="@{/game(position=${iterStat.index})}"></a>
+                <!--<p th:if="${mark.isEmpty() and gameStatus != 'Active'}"></p>-->
+                <a th:if="${mark.isEmpty() and aiTurn == false}"
+                   th:href="@{'/game/' + ${webUIId}(position=${iterStat.index})}"
+                        class="position"></a>
 
-                <p th:if="${!mark.isEmpty()}" th:text="${mark}"></p>
+                <p th:if="${!mark.isEmpty() or aiTurn == true}" th:text="${mark}"></p>
             </div>
         </section>
+        <aside>
+            <section class="space-medium">
+                <h3>Game status:</h3>
+                <p th:text="${gameStatus}" class="status"></p>
+            </section>
+            <section>
+                <a th:href="@{/game/select}">Play new game</a>
+            </section>
+        </aside>
     </main>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package kg.jarkyn.tictactoe_web;
 
+import kg.jarkyn.GameOption;
 import kg.jarkyn.tictactoe_web.controllers.TictactoeController;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,69 +9,172 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import static org.junit.Assert.assertEquals;
+import java.util.List;
+
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 public class TictactoeControllerWithMinimalSpringSetupTest {
+    private final String cvhOption = "1";
+    private final String hvhOption = "3";
+    private final String cvcOption = "4";
     private MockMvc mockMvc;
     private WebUI webUI;
+    private Repository repo;
+    private MvcResult result;
 
     @Before
     public void setUp() throws Exception {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
         viewResolver.setPrefix("/templates");
         viewResolver.setSuffix(".html");
-        webUI = new WebUI();
-        mockMvc = standaloneSetup(new TictactoeController(webUI)).setViewResolvers(viewResolver).build();
+        repo = new Repository();
+        mockMvc = standaloneSetup(new TictactoeController(repo)).setViewResolvers(viewResolver).build();
     }
 
     @Test
     public void getsGameSelection() throws Exception {
-        mockMvc.perform(get("/game/select"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("select_game"));
+        result = sendGet("/game/select");
+
+        ModelAndView modelAndView = result.getModelAndView();
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals("select_game", modelAndView.getViewName());
+        assertArrayEquals(GameOption.values(), (Object[]) modelAndView.getModel().get("gameOptions"));
+    }
+
+    @Test
+    public void storesNewUI() throws Exception {
+        sendGet("/game?gameOption=" + cvhOption);
+
+        assertFalse(repo.isEmpty());
+    }
+
+    @Test
+    public void setsGame() throws Exception {
+        sendGet("/game?gameOption=" + cvhOption);
+
+        webUI = repo.getLast();
+        assertNotNull(webUI.getGame());
     }
 
     @Test
     public void getNewGame() throws Exception {
-        mockMvc.perform(get("/game?gameOption=1"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("game"));
+        result = sendGet("/game?gameOption=" + cvhOption);
+
+        webUI = repo.getLast();
+        assertEquals(302, result.getResponse().getStatus());
+        assertEquals("/game/" + repo.getLastId(), result.getResponse().getRedirectedUrl());
     }
 
     @Test
-    public void getsGame() throws Exception {
-        String hvhNumericOption = "3";
-        webUI.setupGame(hvhNumericOption);
-        MvcResult result = playMoves(new String[]{"0"});
+    public void getsSpecificGame() throws Exception {
+        setupWebUI(hvhOption);
+        int id = repo.getLastId();
+
+        result = sendGet("/game/" + id);
 
         ModelAndView modelAndView = result.getModelAndView();
         assertEquals(200, result.getResponse().getStatus());
         assertEquals("game", modelAndView.getViewName());
+        assertEquals("Active", modelAndView.getModel().get("gameStatus"));
+        assertFalse((boolean) modelAndView.getModel().get("aiTurn"));
+        assertEquals(id, modelAndView.getModel().get("webUIId"));
+        assertEquals(modelAndView.getModel().get("marks"), repo.find(id).formatMarks());
+    }
+
+    @Test
+    public void isAiTurn() throws Exception {
+        setupWebUI(cvcOption);
+        int id = repo.getLastId();
+
+        result = sendGet("/game/" + id);
+
+        ModelAndView modelAndView = result.getModelAndView();
+        assertTrue((boolean) modelAndView.getModel().get("aiTurn"));
+    }
+
+    @Test
+    public void playsAiMove() throws Exception {
+        setupWebUI(cvhOption);
+        int id = repo.getLastId();
+
+        result = sendGet("/game/" + id);
+
+        ModelAndView modelAndView = result.getModelAndView();
+        assertEquals(200, result.getResponse().getStatus());
+        assertEquals("game", modelAndView.getViewName());
+        assertEquals("Active", modelAndView.getModel().get("gameStatus"));
+        assertFalse((boolean) modelAndView.getModel().get("aiTurn"));
+        assertEquals(id, modelAndView.getModel().get("webUIId"));
+        List<String> marks = repo.find(id).formatMarks();
+        assertEquals(modelAndView.getModel().get("marks"), marks);
+        assertTrue(marks.contains("X"));
+        assertFalse(marks.contains("O"));
+    }
+
+    @Test
+    public void playsHumanMoves() throws Exception {
+        setupWebUI(hvhOption);
+        int id = repo.getLastId();
+
+        result = sendGet("/game/" + id + "?position=0");
+
+        ModelAndView modelAndView = result.getModelAndView();
+        assertEquals(302, result.getResponse().getStatus());
+        assertEquals("redirect:/game/" + id, modelAndView.getViewName());
     }
 
     @Test
     public void getsGameOver() throws Exception {
-        String hvhNumericOption = "3";
-        webUI.setupGame(hvhNumericOption);
-        MvcResult result = playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
+        setupWebUI(hvhOption);
+        int id = repo.getLastId();
+        playMoves(id, new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
+
+        result = sendGet("/game/" + id);
 
         ModelAndView modelAndView = result.getModelAndView();
         assertEquals(200, result.getResponse().getStatus());
-        assertEquals("game_over", modelAndView.getViewName());
-        assertEquals("", modelAndView.getModel().get("winner"));
+        assertEquals("game", modelAndView.getViewName());
+        assertEquals("It's a draw!", modelAndView.getModel().get("gameStatus"));
+        assertFalse((boolean) modelAndView.getModel().get("aiTurn"));
+        assertEquals(id, modelAndView.getModel().get("webUIId"));
+        assertEquals(modelAndView.getModel().get("marks"), repo.find(id).formatMarks());
     }
 
-    private MvcResult playMoves(String[] positions) throws Exception {
-        MvcResult result = null;
-        String urlPartial = "/game?position=";
+    @Test
+    public void handlesMultipleGames() throws Exception {
+        setupWebUI(hvhOption);
+        int firstId = repo.getLastId();
+        setupWebUI(hvhOption);
+        int lastId = repo.getLastId();
+
+        MvcResult firstResult = sendGet("/game/" + firstId + "?position=0");
+        MvcResult lastResult = sendGet("/game/" + lastId + "?position=1");
+
+        assertEquals(302, firstResult.getResponse().getStatus());
+        assertEquals("redirect:/game/" + firstId, firstResult.getModelAndView().getViewName());
+
+        assertEquals(302, lastResult.getResponse().getStatus());
+        assertEquals("redirect:/game/" + lastId, lastResult.getModelAndView().getViewName());
+    }
+
+    private void setupWebUI(String gameOption) {
+        webUI = new WebUI();
+        repo.save(webUI);
+        webUI.setupGame(gameOption);
+    }
+
+    private void playMoves(int webUIId, String[] positions) throws Exception {
+        String gameUrl = "/game/" + webUIId;
+        String urlPartial = gameUrl + "?position=";
         for (String position : positions) {
-            String url = urlPartial + position;
-            result = mockMvc.perform(get(url)).andReturn();
+            sendGet(urlPartial + position);
+            result = sendGet(gameUrl);
         }
-        return result;
+    }
+
+    private MvcResult sendGet(String url) throws Exception {
+        return mockMvc.perform(get(url)).andReturn();
     }
 }

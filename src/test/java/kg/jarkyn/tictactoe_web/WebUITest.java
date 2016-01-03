@@ -1,5 +1,7 @@
 package kg.jarkyn.tictactoe_web;
 
+import kg.jarkyn.AiPlayer;
+import kg.jarkyn.HumanPlayer;
 import kg.jarkyn.Mark;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +15,9 @@ import static org.junit.Assert.*;
 public class WebUITest {
 
     private WebUI ui;
+    private final String cvhOption = "1";
+    private final String hvhOption = "3";
+    private final String cvcOption = "4";
 
     @Before
     public void setUp() {
@@ -53,79 +58,113 @@ public class WebUITest {
 
     @Test
     public void setsGame() {
-        String numericGameOption = "1";
-        ui.setupGame(numericGameOption);
+        ui.setupGame(cvhOption);
 
         assertNotNull(ui.getGame());
     }
 
     @Test
-    public void playsGame() {
-        String numericGameOption = "3";
-        ui.setupGame(numericGameOption);
-        ui.setHumanMove(0);
+    public void setsCorrectGame() throws Exception {
+        ui.setupGame(cvhOption);
 
-        ui.playGame();
-
-        assertFalse(ui.getGame().getBoard().isValidMove(0));
+        assertTrue(ui.getGame().getPlayerX() instanceof AiPlayer);
+        assertTrue(ui.getGame().getPlayerO() instanceof HumanPlayer);
     }
 
     @Test
-    public void gameIsOver() {
-        String aiVsAiNuericOption = "4";
-        ui.setupGame(aiVsAiNuericOption);
-        ui.getGame().play();
+    public void placesPlayedMovesOnTheBoard() {
+        ui.setupGame(hvhOption);
 
-        assertTrue(ui.isGameOver());
+        playMoves(Arrays.asList(0));
+
+        assertEquals(Mark.X, ui.getGame().getBoard().markAt(0));
     }
 
     @Test
     public void gameIsNotOver() {
-        String hvhNumericOption = "3";
-        ui.setupGame(hvhNumericOption);
+        ui.setupGame(hvhOption);
 
         assertFalse(ui.isGameOver());
     }
 
     @Test
-    public void convertsX() {
-        assertEquals("X", ui.convertMark(Mark.X));
+    public void gameIsOver() {
+        ui.setupGame(hvhOption);
+
+        playMoves(Arrays.asList(0, 4, 3, 6, 2, 1, 7, 5, 8));
+
+        assertTrue(ui.isGameOver());
     }
 
     @Test
-    public void convertsNONE() {
-        assertEquals("", ui.convertMark(Mark.NONE));
+    public void formatsMarks() {
+        ui.setupGame(hvhOption);
+
+        playMoves(Arrays.asList(0));
+
+        assertEquals(Arrays.asList("X", "", "", "", "", "", "", "", ""), ui.formatMarks());
     }
 
     @Test
-    public void getsMarks() {
-        String numericGameOption = "3";
-        ui.setupGame(numericGameOption);
-        ui.setHumanMove(0);
+    public void formatsGameActiveStatus(){
+        ui.setupGame(cvhOption);
 
-        ui.playGame();
-
-        assertArrayEquals(new String[]{"X", "", "", "", "", "", "", "", ""}, ui.getMarks());
+        assertEquals("Active", ui.formatGameStatus());
     }
 
     @Test
-    public void getsNoWinner() {
-        String numericGameOption = "1";
-        ui.setupGame(numericGameOption);
-        ui.getGame().play();
+    public void formatsDrawStatus() {
+        ui.setupGame(hvhOption);
 
-        assertEquals("", ui.getWinner());
+        playMoves(Arrays.asList(0, 4, 3, 6, 2, 1, 7, 5, 8));
+
+        assertEquals("It's a draw!", ui.formatGameStatus());
     }
 
     @Test
-    public void playsAiMove() {
-        String aiVsHumanNumericOption = "1";
-        ui.setupGame(aiVsHumanNumericOption);
+    public void formatsGameWonStatus() {
+        ui.setupGame(hvhOption);
 
-        assertTrue(contain(ui.getMarks(), "X"));
+        playMoves(Arrays.asList(0, 1, 3, 4, 6));
+
+        assertEquals("Player X won!", ui.formatGameStatus());
     }
 
-    private boolean contain(String[] marks, String mark) {
-        return Arrays.asList(marks).indexOf(mark) != -1;
+    @Test
+    public void notAiTurn() {
+        ui.setupGame(hvhOption);
+
+        assertFalse(ui.isAiTurn());
+    }
+
+    @Test
+    public void isAiTurn() {
+        ui.setupGame(cvcOption);
+
+
+
+        assertTrue(ui.isAiTurn());
+    }
+
+    @Test
+    public void notAiTurnWhenOver() {
+        ui.setupGame(cvcOption);
+
+        playAllAiMoves();
+
+        assertFalse(ui.isAiTurn());
+    }
+
+    private void playAllAiMoves() {
+        for (int i = 0; i < ui.getGame().getBoard().getSize(); i++) {
+            ui.playGame();
+        }
+    }
+
+    private void playMoves(List<Integer> moves) {
+        for (int move : moves) {
+            ui.setHumanMove(move);
+            ui.playGame();
+        }
     }
 }
