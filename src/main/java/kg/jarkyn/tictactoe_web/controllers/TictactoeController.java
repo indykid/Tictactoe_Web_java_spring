@@ -33,6 +33,7 @@ public class TictactoeController {
         setupGame(gameOption);
         ModelAndView modelAndView = new ModelAndView("game");
         modelAndView.addObject("marks", webUI.getMarks());
+        modelAndView.addObject("status", webUI.formatStatus());
         return modelAndView;
     }
 
@@ -40,15 +41,13 @@ public class TictactoeController {
     public ModelAndView game(String position) {
         playGame(position);
 
+        ModelAndView modelAndView = new ModelAndView("game");
         if (isGameOver()) {
-            ModelAndView modelAndView = new ModelAndView("game_over");
             modelAndView.addObject("winner", webUI.getWinner());
-            return modelAndView;
-        } else {
-            ModelAndView modelAndView = new ModelAndView("game");
-            modelAndView.addObject("marks", webUI.getMarks());
-            return modelAndView;
         }
+        modelAndView.addObject("marks", webUI.getMarks());
+        modelAndView.addObject("status", webUI.formatStatus());
+        return modelAndView;
     }
 
     private boolean isGameOver() {

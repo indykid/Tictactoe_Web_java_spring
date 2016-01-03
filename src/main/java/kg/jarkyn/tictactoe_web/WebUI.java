@@ -27,8 +27,8 @@ public class WebUI implements HumanInput {
 
     public void setupGame(String numericGameOption) {
         GameOption gameOption = ParamParser.parseGameOption(numericGameOption);
-        this.game = GameFactory.makeGame(new Board(), gameOption, this);
-        this.game.play();
+        game = GameFactory.makeGame(new Board(), gameOption, this);
+        game.play();
     }
 
     public Game getGame() {
@@ -59,5 +59,13 @@ public class WebUI implements HumanInput {
     public String getWinner() {
         Mark mark = game.winnerMark();
         return mark == Mark.NONE ? "" : mark.toString();
+    }
+
+    public String formatStatus() {
+        if (game.isOver()) {
+            return game.isWon() ? "Player " + game.winnerMark() + " won!" : "It's a draw!";
+        } else {
+            return "Active";
+        }
     }
 }
