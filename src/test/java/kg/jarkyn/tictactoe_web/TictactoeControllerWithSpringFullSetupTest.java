@@ -1,5 +1,7 @@
 package kg.jarkyn.tictactoe_web;
 
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,12 +29,19 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     private String baseUrl;
     private RestTemplate template;
-    ResponseEntity<String> response;
+    private ResponseEntity<String> response;
 
     @Before
     public void setUp() throws Exception {
         baseUrl = "http://localhost:" + port;
         template = new TestRestTemplate();
+    }
+
+    @Test
+    public void getsGameSelection() {
+        response = template.getForEntity(baseUrl + "/game/select", String.class);
+
+        assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test
@@ -44,23 +53,38 @@ public class TictactoeControllerWithSpringFullSetupTest {
 
     @Test
     public void getsGame() throws MalformedURLException {
-        playMoves(new String[]{"0"});
+        String hvhOption = "3";
+        ResponseEntity newGameResponse = template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
+        String url = baseUrl + findUrl(newGameResponse);
+
+        response = template.getForEntity(url, String.class);
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test
     public void getsGameOver() throws MalformedURLException {
-        playMoves(new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"});
+        String hvhOption = "3";
+        ResponseEntity newGameResponse = template.getForEntity(baseUrl + "/game?gameOption=" + hvhOption, String.class);
+
+        response = playAllMoves(newGameResponse);
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
-    private void playMoves(String[] positions) throws MalformedURLException {
-        String urlPartial = baseUrl + "/game?position=";
+    private ResponseEntity<String> playAllMoves(ResponseEntity lastResponse) {
+        String[] positions = new String[]{"0", "4", "3", "6", "2", "1", "7", "5", "8"};
+        String url = baseUrl + findUrl(lastResponse) + "?position=";
+
         for (String position : positions) {
-            String url = urlPartial + position;
-            response = template.getForEntity(url, String.class);
+            response = template.getForEntity(url + position, String.class);
         }
+        return response;
+    }
+
+    private String findUrl(ResponseEntity response) {
+        Elements elements = Jsoup.parse(response.toString()).select("a.position");
+        String[] urlParts = elements.attr("href").split("\\?");
+        return urlParts[0];
     }
 }
